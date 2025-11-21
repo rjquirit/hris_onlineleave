@@ -1,0 +1,8 @@
+{
+    "first_name": "Test",
+    "last_name": "Delete",
+    "email": "delete.me@example.com",
+    "position": "Tester",
+    "department": "QA",
+    "salary": 1000
+}
