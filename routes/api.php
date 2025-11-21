@@ -14,5 +14,13 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
+    Route::get('personnel/export', [PersonnelController::class, 'exportExcel']);
+    Route::get('personnel/pdf', [PersonnelController::class, 'downloadPdf']);
     Route::apiResource('personnel', PersonnelController::class);
+
+    Route::get('permissions', [App\Http\Controllers\RoleController::class, 'getAllPermissions']);
+    Route::apiResource('roles', App\Http\Controllers\RoleController::class);
+
+    Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+    Route::post('users/{id}/assign-role', [App\Http\Controllers\UserController::class, 'assignRole']);
 });

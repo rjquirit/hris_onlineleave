@@ -13,3 +13,11 @@ Route::get('/login', function () {
 Route::get('/personnel', function () {
     return view('personnel.index');
 });
+
+Route::get('/roles', function () {
+    return view('roles.index');
+});
+
+Route::get('/users', function () {
+    return view('users.index');
+});

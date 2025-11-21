@@ -3,9 +3,13 @@
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2>Personnel Management</h2>
-    <button type="button" class="btn btn-primary" onclick="openModal()">
-        Add Personnel
-    </button>
+    <div>
+        <button type="button" class="btn btn-success me-2" onclick="exportExcel()">Export Excel</button>
+        <button type="button" class="btn btn-danger me-2" onclick="downloadPdf()">Download PDF</button>
+        <button type="button" class="btn btn-primary" onclick="openModal()">
+            Add Personnel
+        </button>
+    </div>
 </div>
 
 <div class="card">
@@ -270,5 +274,51 @@
     }
 
 
+    function exportExcel() {
+        const token = localStorage.getItem('access_token');
+        // For file downloads with auth, we can't easily use fetch/ajax directly to trigger download
+        // A common workaround is to use window.open if the route is protected by cookie/session,
+        // but since we use Sanctum API token, we might need a different approach or just use a temporary signed URL.
+        // However, for simplicity in this context, if we assume the browser has the session (if using Sanctum SPA auth), window.open works.
+        // If using pure API token, we'd need to pass it as a query param or handle the blob response.
+        
+        // Let's try handling the blob response for better security with tokens.
+        fetch('/api/personnel/export', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'personnel.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => console.error('Error exporting Excel:', error));
+    }
+
+    function downloadPdf() {
+        const token = localStorage.getItem('access_token');
+        fetch('/api/personnel/pdf', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+        .then(response => response.blob())
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'personnel.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        })
+        .catch(error => console.error('Error downloading PDF:', error));
+    }
 </script>
 @endsection

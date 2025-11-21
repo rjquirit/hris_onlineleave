@@ -58,4 +58,16 @@ class PersonnelController extends Controller
 
         return response()->json(['message' => 'Personnel deleted successfully']);
     }
+
+    public function downloadPdf()
+    {
+        $personnel = Personnel::all();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.sample', compact('personnel'));
+        return $pdf->download('personnel.pdf');
+    }
+
+    public function exportExcel()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\PersonnelExport, 'personnel.xlsx');
+    }
 }
