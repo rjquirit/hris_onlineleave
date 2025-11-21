@@ -13,6 +13,11 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens, \Spatie\Permission\Traits\HasRoles;
 
+    public function personnel()
+    {
+        return $this->belongsTo(Personnel::class, 'personnel_id');
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -22,6 +27,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'personnel_id',
     ];
 
     /**

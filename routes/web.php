@@ -21,3 +21,5 @@ Route::get('/roles', function () {
 Route::get('/users', function () {
     return view('users.index');
 });
+
+Route::get('/profile', [App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');

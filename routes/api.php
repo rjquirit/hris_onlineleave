@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('permissions', [App\Http\Controllers\RoleController::class, 'getAllPermissions']);
     Route::apiResource('roles', App\Http\Controllers\RoleController::class);
 
-    Route::get('users', [App\Http\Controllers\UserController::class, 'index']);
+    Route::apiResource('users', App\Http\Controllers\UserController::class);
     Route::post('users/{id}/assign-role', [App\Http\Controllers\UserController::class, 'assignRole']);
+    Route::put('/profile', [App\Http\Controllers\ProfileController::class, 'update']);
 });

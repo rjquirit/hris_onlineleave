@@ -9,6 +9,11 @@ class Personnel extends Model
 {
     use HasFactory;
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'personnel_id');
+    }
+
     protected $table = 'office_personnel';
 
     protected $fillable = [
