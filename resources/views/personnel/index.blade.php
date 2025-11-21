@@ -78,8 +78,7 @@
         </div>
     </div>
 </div>
-
-<!-- Delete Confirmation Modal -->
+<!-- Delete Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -98,11 +97,63 @@
         </div>
     </div>
 </div>
+
+<!-- Leave Card Modal -->
+<div class="modal fade" id="leaveCardModal" tabindex="-1" aria-labelledby="leaveCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaveCardModalLabel">Leave Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                
+                <div class="mb-3 text-end">
+                    <button class="btn btn-success btn-sm" onclick="exportLeaveCardExcel()">Export Excel</button>
+                    <button class="btn btn-danger btn-sm" onclick="exportLeaveCardPdf()">Export PDF</button>
+                </div>
+                <div id="leave-card-personnel-info" class="mb-3"></div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm" style="font-size: 0.8rem;">
+                        <thead>
+                            <tr>
+                                <th>Period</th>
+                                <th>Particulars</th>
+                                <th>VL Earned</th>
+                                <th>VL Abs/Und Pay</th>
+                                <th>VL Bal</th>
+                                <th>VL Abs/Und No Pay</th>
+                                <th>SL Earned</th>
+                                <th>SL Abs/Und Pay</th>
+                                <th>SL Bal</th>
+                                <th>SL Abs/Und No Pay</th>
+                                <th>CTO Earned</th>
+                                <th>CTO Abs/Und Pay</th>
+                                <th>CTO Bal</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leave-card-table-body">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('scripts')
 <script>
+    let personnelModal;
     let deleteModal;
+    let leaveCardModal;
+    let currentPersonnelIdForLeaveCard;
 
     document.addEventListener('DOMContentLoaded', function() {
         const token = localStorage.getItem('access_token');
@@ -111,96 +162,37 @@
             return;
         }
         
+        // Initialize Modals
         personnelModal = new bootstrap.Modal(document.getElementById('personnelModal'));
         deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        leaveCardModal = new bootstrap.Modal(document.getElementById('leaveCardModal'));
         
-        // Event Delegation
+        // Event Delegation for Table Actions
         document.getElementById('personnel-table-body').addEventListener('click', function(e) {
-            if (e.target.classList.contains('edit-btn')) {
-                editPersonnel(e.target.getAttribute('data-id'));
-            } else if (e.target.classList.contains('delete-btn')) {
-                deletePersonnel(e.target.getAttribute('data-id'));
+            const target = e.target;
+            
+            // Edit Button
+            if (target.classList.contains('edit-btn')) {
+                editPersonnel(target.getAttribute('data-id'));
+                return;
+            }
+            
+            // Delete Button
+            if (target.classList.contains('delete-btn')) {
+                deletePersonnel(target.getAttribute('data-id'));
+                return;
+            }
+
+            // View Leave Card Button (handle icon click too)
+            const viewBtn = target.closest('.view-leave-card-btn');
+            if (viewBtn) {
+                viewLeaveCard(viewBtn.getAttribute('data-id'));
+                return;
             }
         });
 
         loadPersonnel();
     });
-
-    // ... (loadPersonnel, openModal, editPersonnel, savePersonnel remain unchanged)
-
-    function deletePersonnel(id) {
-        console.log('deletePersonnel called with id:', id);
-        document.getElementById('deleteId').value = id;
-        deleteModal.show();
-    }
-
-    async function confirmDelete() {
-        const id = document.getElementById('deleteId').value;
-        const token = localStorage.getItem('access_token');
-        
-        try {
-            const response = await fetch(`/api/personnel/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-
-            if (response.ok) {
-                console.log('Delete successful, reloading...');
-                deleteModal.hide();
-                loadPersonnel();
-            } else {
-                const errorData = await response.json();
-                console.error('Delete failed:', errorData);
-                alert('Error deleting personnel: ' + (errorData.message || 'Unknown error'));
-            }
-        } catch (error) {
-            console.error('Error deleting personnel:', error);
-        }
-    }
-
-    async function loadPersonnel() {
-        const token = localStorage.getItem('access_token');
-        try {
-            const response = await fetch('/api/personnel?t=' + new Date().getTime(), {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (response.status === 401) {
-                logout(new Event('click'));
-                return;
-            }
-
-            const data = await response.json();
-            const tbody = document.getElementById('personnel-table-body');
-            tbody.innerHTML = '';
-
-            let rows = '';
-            data.forEach(person => {
-                rows += `
-                    <tr>
-                        <td>${person.first_name} ${person.last_name}</td>
-                        <td>${person.email}</td>
-                        <td>${person.position}</td>
-                        <td>${person.department}</td>
-                        <td>${parseFloat(person.salary).toFixed(2)}</td>
-                        <td>
-                            <button class="btn btn-sm btn-info text-white edit-btn" data-id="${person.id}">Edit</button>
-                            <button class="btn btn-sm btn-danger delete-btn" data-id="${person.id}">Delete</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            tbody.innerHTML = rows;
-        } catch (error) {
-            console.error('Error loading personnel:', error);
-        }
-    }
 
     function openModal() {
         document.getElementById('personnelForm').reset();
@@ -273,16 +265,171 @@
         }
     }
 
+    function deletePersonnel(id) {
+        document.getElementById('deleteId').value = id;
+        deleteModal.show();
+    }
+
+    async function confirmDelete() {
+        const id = document.getElementById('deleteId').value;
+        const token = localStorage.getItem('access_token');
+        
+        try {
+            const response = await fetch(`/api/personnel/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                deleteModal.hide();
+                loadPersonnel();
+            } else {
+                const errorData = await response.json();
+                alert('Error deleting personnel: ' + (errorData.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error deleting personnel:', error);
+        }
+    }
+
+    async function loadPersonnel() {
+        const token = localStorage.getItem('access_token');
+        try {
+            const response = await fetch('/api/personnel?t=' + new Date().getTime(), {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.status === 401) {
+                logout(new Event('click'));
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const tbody = document.getElementById('personnel-table-body');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center">No personnel found.</td></tr>';
+                return;
+            }
+
+            let rows = '';
+            data.forEach(person => {
+                rows += `
+                    <tr>
+                        <td>${person.first_name} ${person.last_name}</td>
+                        <td>${person.email}</td>
+                        <td>${person.position}</td>
+                        <td>${person.department}</td>
+                        <td>${parseFloat(person.salary).toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info text-white edit-btn" data-id="${person.id}">Edit</button>
+                            <button class="btn btn-sm btn-danger delete-btn" data-id="${person.id}">Delete</button>
+                            <button class="btn btn-sm btn-secondary view-leave-card-btn" data-id="${person.personnel_id || person.id}" title="View Leave Card"><i class="bi bi-card-list"></i></button>
+                        </td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = rows;
+        } catch (error) {
+            console.error('Error loading personnel:', error);
+        }
+    }
+
+    async function viewLeaveCard(personnelId) {
+        currentPersonnelIdForLeaveCard = personnelId;
+        const token = localStorage.getItem('access_token');
+        
+        // Clear previous data
+        document.getElementById('leave-card-table-body').innerHTML = '<tr><td colspan="14" class="text-center">Loading...</td></tr>';
+        document.getElementById('leave-card-personnel-info').innerHTML = '';
+        
+        if (leaveCardModal) {
+            leaveCardModal.show();
+        } else {
+            console.error('Leave Card Modal not initialized');
+            alert('Error: Leave Card Modal not initialized. Please refresh the page.');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/leave-card/${personnelId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                const data = result.leave_cards;
+                const personnel = result.personnel;
+
+                // Populate Personnel Info
+                if (personnel) {
+                    document.getElementById('leave-card-personnel-info').innerHTML = `
+                        <div class="row">
+                            <div class="col-md-4"><strong>Name:</strong> ${personnel.first_name} ${personnel.last_name}</div>
+                            <div class="col-md-4"><strong>Position:</strong> ${personnel.position}</div>
+                            <div class="col-md-4"><strong>Department:</strong> ${personnel.department}</div>
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('leave-card-personnel-info').innerHTML = '<div class="text-danger">Personnel information not found.</div>';
+                }
+
+                const tbody = document.getElementById('leave-card-table-body');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="14" class="text-center">No records found.</td></tr>';
+                    return;
+                }
+
+                let rows = '';
+                data.forEach(card => {
+                    rows += `
+                        <tr>
+                            <td>${card.PERIOD || ''}</td>
+                            <td>${card.PARTICULARS || ''}</td>
+                            <td>${card.VL_EARNED || ''}</td>
+                            <td>${card.VL_ABSENCE_UNDERTIMEWITHPAY || ''}</td>
+                            <td>${card.VL_BALANCE || ''}</td>
+                            <td>${card.VL_ABSENCE_UNDERTIMEWITHOUTPAY || ''}</td>
+                            <td>${card.SL_EARNED || ''}</td>
+                            <td>${card.SL_ABSENCE_UNDERTIMEWITHPAY || ''}</td>
+                            <td>${card.SL_BALANCE || ''}</td>
+                            <td>${card.SL_ABSENCE_UNDERTIMEWITHOUTPAY || ''}</td>
+                            <td>${card.CTO_EARNED_HRS || ''}</td>
+                            <td>${card.CTO_ABSENCE_UNDERTIMEWITHPAY_HRS || ''}</td>
+                            <td>${card.CTO_BALANCE_HRS || ''}</td>
+                            <td>${card.CTO_REMARK || ''}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = rows;
+            } else {
+                console.error('Failed to fetch leave card data');
+                document.getElementById('leave-card-table-body').innerHTML = '<tr><td colspan="14" class="text-center text-danger">Failed to load data.</td></tr>';
+            }
+        } catch (error) {
+            console.error('Error fetching leave card:', error);
+            document.getElementById('leave-card-table-body').innerHTML = '<tr><td colspan="14" class="text-center text-danger">Error loading data.</td></tr>';
+        }
+    }
 
     function exportExcel() {
         const token = localStorage.getItem('access_token');
-        // For file downloads with auth, we can't easily use fetch/ajax directly to trigger download
-        // A common workaround is to use window.open if the route is protected by cookie/session,
-        // but since we use Sanctum API token, we might need a different approach or just use a temporary signed URL.
-        // However, for simplicity in this context, if we assume the browser has the session (if using Sanctum SPA auth), window.open works.
-        // If using pure API token, we'd need to pass it as a query param or handle the blob response.
-        
-        // Let's try handling the blob response for better security with tokens.
         fetch('/api/personnel/export', {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -319,6 +466,16 @@
             a.remove();
         })
         .catch(error => console.error('Error downloading PDF:', error));
+    }
+
+    function exportLeaveCardExcel() {
+        if (!currentPersonnelIdForLeaveCard) return;
+        window.location.href = `/leave-card/export/excel/${currentPersonnelIdForLeaveCard}`;
+    }
+
+    function exportLeaveCardPdf() {
+        if (!currentPersonnelIdForLeaveCard) return;
+        window.location.href = `/leave-card/export/pdf/${currentPersonnelIdForLeaveCard}`;
     }
 </script>
 @endsection
