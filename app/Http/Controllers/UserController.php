@@ -18,11 +18,22 @@ class UserController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8',
             'personnel_id' => 'nullable|exists:office_personnel,id|unique:users',
             'role' => 'nullable|exists:roles,name',
         ]);
+
+        // Check email uniqueness using blind index
+        $encryptionService = app(\App\Services\EncryptionService::class);
+        $emailSearchIndex = $encryptionService->generateBlindIndex($validatedData['email']);
+        
+        if (User::where('email_search_index', $emailSearchIndex)->exists()) {
+            return response()->json([
+                'message' => 'The email has already been taken.',
+                'errors' => ['email' => ['The email has already been taken.']]
+            ], 422);
+        }
 
         $validatedData['password'] = bcrypt($validatedData['password']);
         
@@ -46,11 +57,28 @@ class UserController extends Controller
 
         $validatedData = $request->validate([
             'name' => 'string|max:255',
-            'email' => 'string|email|max:255|unique:users,email,' . $id,
+            'email' => 'string|email|max:255',
             'password' => 'nullable|string|min:8',
             'personnel_id' => 'nullable|exists:office_personnel,id|unique:users,personnel_id,' . $id,
             'role' => 'nullable|exists:roles,name',
         ]);
+
+        // Check email uniqueness using blind index (if email is being updated)
+        if (isset($validatedData['email'])) {
+            $encryptionService = app(\App\Services\EncryptionService::class);
+            $emailSearchIndex = $encryptionService->generateBlindIndex($validatedData['email']);
+            
+            $existingUser = User::where('email_search_index', $emailSearchIndex)
+                ->where('id', '!=', $id)
+                ->first();
+                
+            if ($existingUser) {
+                return response()->json([
+                    'message' => 'The email has already been taken.',
+                    'errors' => ['email' => ['The email has already been taken.']]
+                ], 422);
+            }
+        }
 
         if (isset($validatedData['password'])) {
             $validatedData['password'] = bcrypt($validatedData['password']);

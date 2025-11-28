@@ -29,3 +29,11 @@ Homestead.json
 .phpactor.json
 auth.json
 .scribe/
+database/migrations/
+
+# Laravel Boost
+.mcp.json
+CLAUDE.md
+AGENTS.md
+junie/
+boost.json

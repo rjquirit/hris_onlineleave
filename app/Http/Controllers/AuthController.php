@@ -16,13 +16,20 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        // Find user by email using blind index search
+        $encryptionService = app(\App\Services\EncryptionService::class);
+        $emailSearchIndex = $encryptionService->generateBlindIndex($request->email);
+        
+        $user = User::where('email_search_index', $emailSearchIndex)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'message' => 'Invalid login details'
             ], 401);
         }
 
-        $user = User::where('email', $request['email'])->firstOrFail();
+        // Log the user in
+        Auth::login($user);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

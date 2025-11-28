@@ -7,15 +7,26 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Traits\HasEncryptedAttributes;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, \Spatie\Permission\Traits\HasRoles;
+    use HasFactory, Notifiable, HasApiTokens, \Spatie\Permission\Traits\HasRoles, HasEncryptedAttributes;
 
     public function personnel()
     {
         return $this->belongsTo(Personnel::class, 'personnel_id');
+    }
+
+    /**
+     * Get the list of encrypted attributes for this model.
+     *
+     * @return array
+     */
+    protected function getEncryptedAttributes(): array
+    {
+        return ['name', 'email'];
     }
 
     /**
@@ -38,6 +49,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'name_search_index',
+        'email_search_index',
     ];
 
     /**
