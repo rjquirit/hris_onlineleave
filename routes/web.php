@@ -1,13 +1,28 @@
 <?php
 
+use App\Http\Controllers\CustomSocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return redirect('/login');
 });
 
+// Employee Dashboard - authenticated users only
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+});
+
+// Override tyro-login's social auth routes to use our custom controller
+// This integrates with our encrypted User model and EncryptionService
+Route::get('auth/{provider}/redirect', [CustomSocialAuthController::class, 'redirect'])
+    ->name('tyro-login.social.redirect');
+Route::get('auth/{provider}/callback', [CustomSocialAuthController::class, 'callback'])
+    ->name('tyro-login.social.callback');
+
+// Tyro-Login automatically registers the /login route
+// Explicitly name it for auth middleware redirects
 Route::get('/login', function () {
-    return view('login');
+    return view('tyro-login::login', ['layout' => config('tyro-login.layout', 'centered')]);
 })->name('login');
 
 Route::get('/personnel', function () {

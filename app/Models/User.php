@@ -3,16 +3,16 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasEncryptedAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Traits\HasEncryptedAttributes;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens, \Spatie\Permission\Traits\HasRoles, HasEncryptedAttributes;
+    use HasApiTokens, HasEncryptedAttributes, HasFactory, Notifiable, \Spatie\Permission\Traits\HasRoles;
 
     public function personnel()
     {
@@ -21,8 +21,6 @@ class User extends Authenticatable
 
     /**
      * Get the list of encrypted attributes for this model.
-     *
-     * @return array
      */
     protected function getEncryptedAttributes(): array
     {
@@ -39,6 +37,9 @@ class User extends Authenticatable
         'email',
         'password',
         'personnel_id',
+        'google_id',
+        'avatar',
+        'email_verified_at',
     ];
 
     /**
@@ -51,6 +52,7 @@ class User extends Authenticatable
         'remember_token',
         'name_search_index',
         'email_search_index',
+        'google_id',
     ];
 
     /**

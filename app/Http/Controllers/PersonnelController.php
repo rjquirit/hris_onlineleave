@@ -26,11 +26,11 @@ class PersonnelController extends Controller
         // Check email uniqueness using blind index
         $encryptionService = app(\App\Services\EncryptionService::class);
         $emailSearchIndex = $encryptionService->generateBlindIndex($validatedData['email']);
-        
+
         if (Personnel::where('email_search_index', $emailSearchIndex)->exists()) {
             return response()->json([
                 'message' => 'The email has already been taken.',
-                'errors' => ['email' => ['The email has already been taken.']]
+                'errors' => ['email' => ['The email has already been taken.']],
             ], 422);
         }
 
@@ -61,15 +61,15 @@ class PersonnelController extends Controller
         if (isset($validatedData['email'])) {
             $encryptionService = app(\App\Services\EncryptionService::class);
             $emailSearchIndex = $encryptionService->generateBlindIndex($validatedData['email']);
-            
+
             $existingPersonnel = Personnel::where('email_search_index', $emailSearchIndex)
                 ->where('id', '!=', $id)
                 ->first();
-                
+
             if ($existingPersonnel) {
                 return response()->json([
                     'message' => 'The email has already been taken.',
-                    'errors' => ['email' => ['The email has already been taken.']]
+                    'errors' => ['email' => ['The email has already been taken.']],
                 ], 422);
             }
         }
@@ -91,6 +91,7 @@ class PersonnelController extends Controller
     {
         $personnel = Personnel::all();
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.sample', compact('personnel'));
+
         return $pdf->download('personnel.pdf');
     }
 

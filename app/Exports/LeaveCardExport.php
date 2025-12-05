@@ -16,8 +16,8 @@ class LeaveCardExport implements FromCollection, WithHeadings
     }
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         return LeaveCard::where('personnel_id', $this->personnel_id)->get();

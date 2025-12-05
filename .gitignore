@@ -16,7 +16,6 @@ public_html/storage
 public_html/hot
 
 storage/*.key
-.env
 Homestead.yaml
 Homestead.json
 /.vagrant
@@ -37,3 +36,14 @@ CLAUDE.md
 AGENTS.md
 junie/
 boost.json
+
+.env
+PROJECT_CONTEXT.md
+QUICK_REFERENCE.md
+
+### TEST
+test_rate_limiting.php
+test_encryption.php
+test_login.php
+create_user.php
+debug_personnel.php

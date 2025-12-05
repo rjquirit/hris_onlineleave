@@ -5,9 +5,9 @@
  * Run with: php test_login.php
  */
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
-$app = require_once __DIR__ . '/bootstrap/app.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 echo "=== Testing Login with Encrypted Email ===\n\n";
@@ -15,7 +15,7 @@ echo "=== Testing Login with Encrypted Email ===\n\n";
 // Get the first user
 $user = \App\Models\User::first();
 
-if (!$user) {
+if (! $user) {
     echo "✗ No users found in database\n";
     exit(1);
 }
@@ -28,7 +28,7 @@ echo "  Name: {$user->name}\n\n";
 echo "1. Testing blind index generation...\n";
 $encryptionService = app(\App\Services\EncryptionService::class);
 $emailSearchIndex = $encryptionService->generateBlindIndex($user->email);
-echo "   Generated blind index: " . substr($emailSearchIndex, 0, 30) . "...\n";
+echo '   Generated blind index: '.substr($emailSearchIndex, 0, 30)."...\n";
 
 // Test 2: Find user by blind index
 echo "\n2. Testing user lookup by blind index...\n";
@@ -45,7 +45,7 @@ if ($foundUser) {
 // Test 3: Verify password check would work
 echo "\n3. Testing password verification...\n";
 // Note: We don't know the actual password, but we can verify the mechanism
-echo "   Password hash exists: " . (!empty($foundUser->password) ? "Yes" : "No") . "\n";
+echo '   Password hash exists: '.(! empty($foundUser->password) ? 'Yes' : 'No')."\n";
 echo "   ✓ Password verification mechanism is in place\n";
 
 echo "\n=== Login Test Complete ===\n";

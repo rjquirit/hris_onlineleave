@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HasEncryptedAttributes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\HasEncryptedAttributes;
 
 class Personnel extends Model
 {
-    use HasFactory, HasEncryptedAttributes;
+    use HasEncryptedAttributes, HasFactory;
 
     public function user()
     {
@@ -17,8 +17,6 @@ class Personnel extends Model
 
     /**
      * Get the list of encrypted attributes for this model.
-     *
-     * @return array
      */
     protected function getEncryptedAttributes(): array
     {

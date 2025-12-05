@@ -5,9 +5,9 @@
  * Run with: php create_user.php
  */
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
-$app = require_once __DIR__ . '/bootstrap/app.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 echo "=== Creating New User ===\n\n";
@@ -34,8 +34,8 @@ if ($existingUser) {
     echo "⚠ User with this email already exists!\n";
     echo "  Existing user: {$existingUser->name} ({$existingUser->email})\n";
     echo "  User ID: {$existingUser->id}\n\n";
-    
-    $confirm = readline("Do you want to update the password? (yes/no): ");
+
+    $confirm = readline('Do you want to update the password? (yes/no): ');
     if (strtolower(trim($confirm)) === 'yes') {
         $existingUser->password = bcrypt($userData['password']);
         $existingUser->name = $userData['name'];
@@ -67,10 +67,10 @@ try {
     // Verify encryption
     $rawUser = \DB::table('users')->where('id', $user->id)->first();
     echo "Database verification:\n";
-    echo "  Name (encrypted): " . substr($rawUser->name, 0, 40) . "...\n";
-    echo "  Email (encrypted): " . substr($rawUser->email, 0, 40) . "...\n";
-    echo "  Name search index: " . substr($rawUser->name_search_index, 0, 30) . "...\n";
-    echo "  Email search index: " . substr($rawUser->email_search_index, 0, 30) . "...\n\n";
+    echo '  Name (encrypted): '.substr($rawUser->name, 0, 40)."...\n";
+    echo '  Email (encrypted): '.substr($rawUser->email, 0, 40)."...\n";
+    echo '  Name search index: '.substr($rawUser->name_search_index, 0, 30)."...\n";
+    echo '  Email search index: '.substr($rawUser->email_search_index, 0, 30)."...\n\n";
 
     echo "✓ Data is properly encrypted in the database!\n";
     echo "✓ You can now login with:\n";
@@ -78,6 +78,6 @@ try {
     echo "  Password: {$userData['password']}\n";
 
 } catch (\Exception $e) {
-    echo "✗ Error creating user: " . $e->getMessage() . "\n";
+    echo '✗ Error creating user: '.$e->getMessage()."\n";
     exit(1);
 }

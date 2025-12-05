@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\LeaveCardExport;
 use App\Models\LeaveCard;
 use App\Models\Personnel;
-use Illuminate\Http\Request;
-use App\Exports\LeaveCardExport;
-use Maatwebsite\Excel\Facades\Excel;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LeaveCardController extends Controller
 {
@@ -18,7 +18,7 @@ class LeaveCardController extends Controller
 
         return response()->json([
             'personnel' => $personnel,
-            'leave_cards' => $leaveCards
+            'leave_cards' => $leaveCards,
         ]);
     }
 
@@ -32,6 +32,7 @@ class LeaveCardController extends Controller
         ]);
 
         $leaveCard = LeaveCard::create($request->all());
+
         return response()->json($leaveCard);
     }
 
@@ -39,18 +40,20 @@ class LeaveCardController extends Controller
     {
         $leaveCard = LeaveCard::findOrFail($id);
         $leaveCard->update($request->all());
+
         return response()->json($leaveCard);
     }
 
     public function destroy($id)
     {
         LeaveCard::destroy($id);
+
         return response()->json(['status' => 'success']);
     }
 
     public function exportExcel($personnel_id)
     {
-        return Excel::download(new LeaveCardExport($personnel_id), 'leave_card_' . $personnel_id . '.xlsx');
+        return Excel::download(new LeaveCardExport($personnel_id), 'leave_card_'.$personnel_id.'.xlsx');
     }
 
     public function exportPdf($personnel_id)
@@ -59,6 +62,7 @@ class LeaveCardController extends Controller
         $personnel = Personnel::find($personnel_id);
 
         $pdf = Pdf::loadView('leave_card.pdf', compact('leaveCards', 'personnel'));
-        return $pdf->download('leave_card_' . $personnel_id . '.pdf');
+
+        return $pdf->download('leave_card_'.$personnel_id.'.pdf');
     }
 }

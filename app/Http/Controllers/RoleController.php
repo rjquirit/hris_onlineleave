@@ -3,14 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleController extends Controller
 {
     public function index()
     {
         $roles = Role::all();
+
         return response()->json($roles);
     }
 
@@ -18,12 +19,12 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:roles,name',
-            'permissions' => 'array'
+            'permissions' => 'array',
         ]);
 
         $role = Role::create(['name' => $request->name]);
-        
-        if($request->has('permissions')) {
+
+        if ($request->has('permissions')) {
             $role->syncPermissions($request->permissions);
         }
 
@@ -33,6 +34,7 @@ class RoleController extends Controller
     public function show($id)
     {
         $role = Role::with('permissions')->findOrFail($id);
+
         return response()->json($role);
     }
 
@@ -40,13 +42,13 @@ class RoleController extends Controller
     {
         $request->validate([
             'name' => 'required|unique:roles,name,'.$id,
-            'permissions' => 'array'
+            'permissions' => 'array',
         ]);
 
         $role = Role::findOrFail($id);
         $role->update(['name' => $request->name]);
 
-        if($request->has('permissions')) {
+        if ($request->has('permissions')) {
             $role->syncPermissions($request->permissions);
         }
 
@@ -60,8 +62,9 @@ class RoleController extends Controller
 
         return response()->json(['message' => 'Role deleted successfully']);
     }
-    
-    public function getAllPermissions() {
+
+    public function getAllPermissions()
+    {
         return response()->json(Permission::all());
     }
 }

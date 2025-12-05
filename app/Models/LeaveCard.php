@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class LeaveCard extends Model
 {
     protected $table = 'leave_card';
+
     protected $primaryKey = 'leavecardid';
+
     public $timestamps = true;
 
     protected $fillable = [

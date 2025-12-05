@@ -4,13 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
-use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
     public function index()
     {
         $users = User::with(['roles', 'personnel'])->get();
+
         return response()->json($users);
     }
 
@@ -27,16 +27,16 @@ class UserController extends Controller
         // Check email uniqueness using blind index
         $encryptionService = app(\App\Services\EncryptionService::class);
         $emailSearchIndex = $encryptionService->generateBlindIndex($validatedData['email']);
-        
+
         if (User::where('email_search_index', $emailSearchIndex)->exists()) {
             return response()->json([
                 'message' => 'The email has already been taken.',
-                'errors' => ['email' => ['The email has already been taken.']]
+                'errors' => ['email' => ['The email has already been taken.']],
             ], 422);
         }
 
         $validatedData['password'] = bcrypt($validatedData['password']);
-        
+
         $user = User::create($validatedData);
 
         if (isset($validatedData['role'])) {
@@ -59,7 +59,7 @@ class UserController extends Controller
             'name' => 'string|max:255',
             'email' => 'string|email|max:255',
             'password' => 'nullable|string|min:8',
-            'personnel_id' => 'nullable|exists:office_personnel,id|unique:users,personnel_id,' . $id,
+            'personnel_id' => 'nullable|exists:office_personnel,id|unique:users,personnel_id,'.$id,
             'role' => 'nullable|exists:roles,name',
         ]);
 
@@ -67,15 +67,15 @@ class UserController extends Controller
         if (isset($validatedData['email'])) {
             $encryptionService = app(\App\Services\EncryptionService::class);
             $emailSearchIndex = $encryptionService->generateBlindIndex($validatedData['email']);
-            
+
             $existingUser = User::where('email_search_index', $emailSearchIndex)
                 ->where('id', '!=', $id)
                 ->first();
-                
+
             if ($existingUser) {
                 return response()->json([
                     'message' => 'The email has already been taken.',
-                    'errors' => ['email' => ['The email has already been taken.']]
+                    'errors' => ['email' => ['The email has already been taken.']],
                 ], 422);
             }
         }
@@ -106,7 +106,7 @@ class UserController extends Controller
     public function assignRole(Request $request, $id)
     {
         $request->validate([
-            'role' => 'required|exists:roles,name'
+            'role' => 'required|exists:roles,name',
         ]);
 
         $user = User::findOrFail($id);

@@ -5,9 +5,9 @@
  * Run with: php test_encryption.php
  */
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__.'/vendor/autoload.php';
 
-$app = require_once __DIR__ . '/bootstrap/app.php';
+$app = require_once __DIR__.'/bootstrap/app.php';
 $app->make(\Illuminate\Contracts\Console\Kernel::class)->bootstrap();
 
 echo "=== HRIS Encryption Verification ===\n\n";
@@ -30,14 +30,14 @@ if ($user) {
     echo "   - Name (decrypted): {$user->name}\n";
     echo "   - Email (decrypted): {$user->email}\n";
     echo "   ✓ User data decrypts successfully\n\n";
-    
+
     // Check database to see encrypted values
     $rawUser = \DB::table('users')->first();
     if ($rawUser) {
         echo "   Raw database values (encrypted):\n";
-        echo "   - Name field: " . substr($rawUser->name, 0, 50) . "...\n";
-        echo "   - Email field: " . substr($rawUser->email, 0, 50) . "...\n";
-        echo "   - Name search index: " . substr($rawUser->name_search_index, 0, 30) . "...\n";
+        echo '   - Name field: '.substr($rawUser->name, 0, 50)."...\n";
+        echo '   - Email field: '.substr($rawUser->email, 0, 50)."...\n";
+        echo '   - Name search index: '.substr($rawUser->name_search_index, 0, 30)."...\n";
         echo "   ✓ Data is encrypted in database\n\n";
     }
 } else {
@@ -56,14 +56,14 @@ if ($personnel) {
     echo "   - Department (decrypted): {$personnel->department}\n";
     echo "   - Salary (decrypted): {$personnel->salary}\n";
     echo "   ✓ Personnel data decrypts successfully\n\n";
-    
+
     // Check database to see encrypted values
     $rawPersonnel = \DB::table('office_personnel')->first();
     if ($rawPersonnel) {
         echo "   Raw database values (encrypted):\n";
-        echo "   - First Name field: " . substr($rawPersonnel->first_name, 0, 50) . "...\n";
-        echo "   - Email field: " . substr($rawPersonnel->email, 0, 50) . "...\n";
-        echo "   - Salary field: " . substr($rawPersonnel->salary, 0, 50) . "...\n";
+        echo '   - First Name field: '.substr($rawPersonnel->first_name, 0, 50)."...\n";
+        echo '   - Email field: '.substr($rawPersonnel->email, 0, 50)."...\n";
+        echo '   - Salary field: '.substr($rawPersonnel->salary, 0, 50)."...\n";
         echo "   ✓ Data is encrypted in database\n\n";
     }
 } else {
@@ -75,10 +75,10 @@ echo "4. Testing search functionality with blind indexes...\n";
 if ($user) {
     $searchTerm = substr($user->name, 0, 4); // Get first 4 characters
     echo "   Searching for users with name containing: '{$searchTerm}'\n";
-    
+
     $encryptionService = app(\App\Services\EncryptionService::class);
     $searchIndex = $encryptionService->generateBlindIndex($searchTerm);
-    
+
     $found = \App\Models\User::where('name_search_index', $searchIndex)->count();
     echo "   Found {$found} user(s) using blind index search\n";
     echo "   ✓ Search functionality works\n\n";

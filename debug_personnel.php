@@ -9,14 +9,14 @@ $kernel->bootstrap();
 
 try {
     $count = Personnel::count();
-    echo "Personnel Count: " . $count . "\n";
+    echo 'Personnel Count: '.$count."\n";
 
     if ($count > 0) {
         $personnel = Personnel::all();
-        echo "First Personnel: " . json_encode($personnel->first()) . "\n";
+        echo 'First Personnel: '.json_encode($personnel->first())."\n";
     } else {
         echo "No personnel found.\n";
     }
 } catch (\Exception $e) {
-    echo "Error: " . $e->getMessage() . "\n";
+    echo 'Error: '.$e->getMessage()."\n";
 }
